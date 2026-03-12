@@ -5,7 +5,7 @@ import Competitors from './pages/Competitors'
 import Trends from './pages/Trends'
 import Alerts from './pages/Alerts'
 
-const basename = import.meta.env.VITE_DEMO_MODE === 'true' ? '/hearo' : '/'
+const basename = import.meta.env.VITE_GH_PAGES === 'true' ? '/hearo' : '/'
 
 export default function App() {
   return (
