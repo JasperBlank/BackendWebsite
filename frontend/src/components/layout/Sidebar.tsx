@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { BarChart2, Bell, BookMarked, Swords, TrendingUp, Trash2, Zap } from 'lucide-react'
+import { BarChart2, Bell, BookMarked, Swords, TrendingUp, Trash2 } from 'lucide-react'
 import { useQueryStore } from '../../store/queryStore'
 import { getReports, deleteReport } from '../../lib/reports'
 import { useState, useEffect } from 'react'
@@ -19,7 +19,6 @@ export default function Sidebar() {
   const navigate = useNavigate()
   const [reports, setReports] = useState(getReports())
 
-  // Refresh reports list when localStorage changes (e.g. after saving)
   useEffect(() => {
     const refresh = () => setReports(getReports())
     window.addEventListener('storage', refresh)
@@ -44,23 +43,22 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-56 min-h-screen bg-[#0d0d15] border-r border-[#1e1e2e] flex flex-col p-4 gap-6 shrink-0">
+    <aside className="w-56 min-h-screen bg-[#0F0F12] border-r border-[#1C1C22] flex flex-col p-4 gap-6 shrink-0">
       {/* Logo */}
-      <div className="flex items-center gap-2 px-2 py-1">
-        <Zap size={18} className="text-violet-400" />
-        <span className="font-bold text-white text-lg tracking-tight">Hearo</span>
+      <div className="flex items-center gap-2.5 px-2 py-1">
+        <span className="font-serif text-xl text-[#F0EEE8] tracking-tight">Hearo</span>
       </div>
 
       {/* Product selector */}
       <div>
-        <p className="text-xs text-gray-500 uppercase tracking-widest mb-2 px-2">Product</p>
+        <p className="section-label mb-2 px-2">Product</p>
         <select
           value={currentProduct}
           onChange={(e) => setProduct(e.target.value)}
-          className="w-full bg-[#17172a] border border-[#2a2a3e] text-gray-200 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-violet-500"
+          className="w-full bg-[#111114] border border-[#1C1C22] text-[#F0EEE8] text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-[#C8F04A]/40 transition-colors"
         >
           {PRODUCTS.map((p) => (
-            <option key={p} value={p} className="capitalize">
+            <option key={p} value={p}>
               {p.charAt(0).toUpperCase() + p.slice(1)}
             </option>
           ))}
@@ -69,6 +67,7 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex flex-col gap-1">
+        <p className="section-label mb-1 px-2">Workspace</p>
         {NAV.map(({ to, label, Icon }) => (
           <NavLink
             key={to}
@@ -78,8 +77,8 @@ export default function Sidebar() {
               clsx(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
                 isActive
-                  ? 'bg-violet-500/15 text-violet-300 font-medium'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
+                  ? 'bg-[#C8F04A]/10 text-[#C8F04A] font-medium'
+                  : 'text-[#9898A2] hover:text-[#F0EEE8] hover:bg-white/[0.03]'
               )
             }
           >
@@ -91,21 +90,21 @@ export default function Sidebar() {
 
       {/* Saved reports */}
       <div className="mt-auto">
-        <p className="text-xs text-gray-500 uppercase tracking-widest mb-2 px-2">Saved Reports</p>
+        <p className="section-label mb-2 px-2">Saved Reports</p>
         {reports.length === 0 ? (
-          <p className="text-xs text-gray-700 px-3">No saved reports yet.</p>
+          <p className="text-xs text-[#78787F] px-3">No saved reports yet.</p>
         ) : (
           reports.slice(0, 8).map((report) => (
             <button
               key={report.id}
               onClick={() => handleLoadReport(report)}
-              className="group flex items-center gap-2 w-full text-left px-3 py-1.5 text-xs text-gray-500 hover:text-gray-300 rounded-lg hover:bg-white/5 transition-colors"
+              className="group flex items-center gap-2 w-full text-left px-3 py-1.5 text-xs text-[#78787F] hover:text-[#F0EEE8] rounded-lg hover:bg-white/[0.03] transition-colors"
             >
               <BookMarked size={12} className="shrink-0" />
               <span className="truncate flex-1">{report.name}</span>
               <Trash2
                 size={11}
-                className="shrink-0 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 transition-all"
+                className="shrink-0 opacity-0 group-hover:opacity-100 text-[#78787F] hover:text-[#FF6B6B] transition-all"
                 onClick={(e) => handleDelete(e, report.id)}
               />
             </button>

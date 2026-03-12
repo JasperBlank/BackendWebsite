@@ -32,8 +32,8 @@ export default function QueryInput() {
 
   return (
     <div className="relative w-full">
-      <div className="flex items-start gap-3 bg-[#111118] border border-[#2a2a3e] rounded-xl px-4 py-3 focus-within:border-violet-500/60 transition-colors">
-        <Search size={18} className="text-gray-500 mt-1 shrink-0" />
+      <div className="flex items-start gap-3 bg-[#111114] border border-[#1C1C22] rounded-xl px-4 py-3 focus-within:border-[#C8F04A]/40 transition-colors">
+        <Search size={18} className="text-[#78787F] mt-1 shrink-0" />
         <textarea
           ref={textareaRef}
           rows={1}
@@ -41,18 +41,18 @@ export default function QueryInput() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={PRODUCT_PLACEHOLDERS[currentProduct] || DEFAULT_PLACEHOLDER}
-          className="flex-1 bg-transparent text-gray-100 placeholder-gray-600 text-sm resize-none focus:outline-none min-h-[24px] max-h-48 leading-relaxed"
+          className="flex-1 bg-transparent text-[#F0EEE8] placeholder-[#78787F] text-sm resize-none focus:outline-none min-h-[24px] max-h-48 leading-relaxed"
         />
         <button
           onClick={submit}
           disabled={isLoading || !currentQuery.trim()}
-          className="shrink-0 flex items-center gap-2 px-4 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors"
+          className="shrink-0 flex items-center gap-2 px-4 py-1.5 bg-[#C8F04A] hover:bg-[#d4f55e] disabled:opacity-40 disabled:cursor-not-allowed text-[#09090B] text-sm font-semibold rounded-lg transition-colors"
         >
           {isLoading ? <Loader2 size={14} className="animate-spin" /> : null}
-          {isLoading ? 'Analyzing...' : 'Analyze'}
+          {isLoading ? 'Analyzing...' : 'Run'}
         </button>
       </div>
-      <p className="text-xs text-gray-600 mt-1 ml-1">⌘↵ to submit</p>
+      <p className="text-xs text-[#78787F] mt-1 ml-1">⌘↵ to submit</p>
     </div>
   )
 }

@@ -8,4 +8,4 @@ RUN python -c "from chromadb.utils.embedding_functions import DefaultEmbeddingFu
 
 COPY backend/ ./backend/
 COPY scripts/ ./scripts/
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--limit-concurrency", "10"]

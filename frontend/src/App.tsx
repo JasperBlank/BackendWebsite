@@ -10,7 +10,7 @@ const basename = import.meta.env.VITE_GH_PAGES === 'true' ? '/hearo' : '/'
 export default function App() {
   return (
     <BrowserRouter basename={basename}>
-      <div className="flex min-h-screen bg-[#0a0a0f]">
+      <div className="flex min-h-screen bg-[#09090B]">
         <Sidebar />
         <main className="flex-1 flex flex-col overflow-y-auto">
           <Routes>

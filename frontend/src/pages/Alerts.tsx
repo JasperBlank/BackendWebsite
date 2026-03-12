@@ -61,33 +61,33 @@ export default function Alerts() {
 
   return (
     <div className="flex-1 p-8 max-w-3xl mx-auto w-full">
-      <h1 className="text-2xl font-bold text-white mb-1">Alerts</h1>
-      <p className="text-sm text-gray-500 mb-6">
+      <h1 className="font-serif text-3xl text-[#F0EEE8] mb-1">Alerts</h1>
+      <p className="text-sm text-[#9898A2] font-light mb-6">
         Get notified when complaint topics spike for{' '}
-        <span className="text-violet-400 capitalize">{currentProduct}</span>.
+        <span className="text-[#C8F04A] capitalize">{currentProduct}</span>.
       </p>
 
       {/* Add alert */}
-      <div className="bg-[#111118] border border-[#1e1e2e] rounded-xl p-5 mb-4">
-        <p className="text-sm font-medium text-gray-300 mb-3">New alert</p>
+      <div className="bg-[#111114] border border-[#1C1C22] rounded-xl p-5 mb-4">
+        <p className="text-sm font-medium text-[#F0EEE8] mb-3">New alert</p>
         <div className="flex gap-3">
           <input
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && add()}
             placeholder="Topic (e.g. performance)"
-            className="flex-1 bg-[#17172a] border border-[#2a2a3e] text-sm text-gray-200 placeholder-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-violet-500"
+            className="flex-1 bg-[#111114] border border-[#242430] text-sm text-[#F0EEE8] placeholder-[#78787F] rounded-lg px-3 py-2 focus:outline-none focus:border-[#C8F04A]/40 transition-colors"
           />
           <input
             type="number"
             value={threshold}
             onChange={(e) => setThreshold(e.target.value)}
-            className="w-20 bg-[#17172a] border border-[#2a2a3e] text-sm text-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-violet-500"
+            className="w-20 bg-[#111114] border border-[#242430] text-sm text-[#F0EEE8] rounded-lg px-3 py-2 focus:outline-none focus:border-[#C8F04A]/40 transition-colors"
           />
-          <span className="text-sm text-gray-500 flex items-center">% threshold</span>
+          <span className="text-sm text-[#78787F] flex items-center">% threshold</span>
           <button
             onClick={add}
-            className="flex items-center gap-1 px-3 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm rounded-lg transition-colors"
+            className="flex items-center gap-1 px-3 py-2 bg-[#C8F04A] hover:bg-[#d4f55e] text-[#09090B] text-sm font-semibold rounded-lg transition-colors"
           >
             <Plus size={14} />
             Add
@@ -99,36 +99,36 @@ export default function Alerts() {
       {loading ? (
         <div className="space-y-2">
           {[1, 2].map((i) => (
-            <div key={i} className="h-14 bg-[#111118] border border-[#1e1e2e] rounded-xl animate-pulse" />
+            <div key={i} className="h-14 bg-[#111114] border border-[#1C1C22] rounded-xl animate-pulse" />
           ))}
         </div>
       ) : alerts.length === 0 ? (
-        <p className="text-sm text-gray-600 text-center py-8">No alerts yet. Add one above.</p>
+        <p className="text-sm text-[#78787F] text-center py-8">No alerts yet. Add one above.</p>
       ) : (
         <div className="space-y-2">
           {alerts.map((alert) => (
             <div
               key={alert.id}
-              className="flex items-center justify-between bg-[#111118] border border-[#1e1e2e] rounded-xl px-5 py-3"
+              className="flex items-center justify-between bg-[#111114] border border-[#1C1C22] rounded-xl px-5 py-3"
             >
               <div className="flex items-center gap-3">
-                <Bell size={14} className={alert.active ? 'text-violet-400' : 'text-gray-600'} />
-                <span className="text-sm text-gray-200 font-medium">{alert.topic}</span>
-                <span className="text-xs text-gray-500">&ge; {alert.threshold}% mentions</span>
+                <Bell size={14} className={alert.active ? 'text-[#C8F04A]' : 'text-[#78787F]'} />
+                <span className="text-sm text-[#F0EEE8] font-medium">{alert.topic}</span>
+                <span className="text-xs text-[#78787F]">&ge; {alert.threshold}% mentions</span>
               </div>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => remove(alert.id)}
-                  className="text-gray-600 hover:text-red-400 transition-colors"
+                  className="text-[#78787F] hover:text-[#FF6B6B] transition-colors"
                 >
                   <Trash2 size={14} />
                 </button>
                 <button
                   onClick={() => toggle(alert.id)}
-                  className={`relative w-10 h-5 rounded-full transition-colors ${alert.active ? 'bg-violet-600' : 'bg-[#2a2a3e]'}`}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${alert.active ? 'bg-[#C8F04A]' : 'bg-[#242430]'}`}
                 >
                   <div
-                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${alert.active ? 'translate-x-5' : 'translate-x-0.5'}`}
+                    className={`absolute top-0.5 w-4 h-4 rounded-full shadow transition-transform ${alert.active ? 'bg-[#09090B] translate-x-5' : 'bg-[#78787F] translate-x-0.5'}`}
                   />
                 </button>
               </div>

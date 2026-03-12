@@ -37,23 +37,23 @@ export default function Competitors() {
 
   return (
     <div className="flex-1 p-8 max-w-4xl mx-auto w-full">
-      <h1 className="text-2xl font-bold text-white mb-1">Competitor Analysis</h1>
-      <p className="text-sm text-gray-500 mb-6">
-        Identify weaknesses in competing products — in users' own words.
+      <h1 className="font-serif text-3xl text-[#F0EEE8] mb-1">Competitor Analysis</h1>
+      <p className="text-sm text-[#9898A2] font-light mb-6">
+        Identify weaknesses in competing products — in users&apos; own words.
       </p>
 
       <div className="space-y-4">
         {competitors.map((competitor) => (
-          <div key={competitor} className="bg-[#111118] border border-[#1e1e2e] rounded-xl p-5">
+          <div key={competitor} className="bg-[#111114] border border-[#1C1C22] rounded-xl p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <Swords size={15} className="text-violet-400" />
-                <h2 className="font-semibold text-white">{competitor}</h2>
+                <Swords size={15} className="text-[#C8F04A]" />
+                <h2 className="font-medium text-[#F0EEE8]">{competitor}</h2>
               </div>
               <button
                 onClick={() => analyze(competitor)}
                 disabled={loading[competitor]}
-                className="text-xs px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white rounded-lg transition-colors"
+                className="text-xs px-3 py-1.5 bg-[#C8F04A] hover:bg-[#d4f55e] disabled:opacity-40 text-[#09090B] font-semibold rounded-lg transition-colors"
               >
                 {loading[competitor] ? 'Analyzing...' : 'Analyze weaknesses'}
               </button>

@@ -27,17 +27,23 @@ app.include_router(alerts.router, prefix="/api/v1", tags=["alerts"])
 
 @app.on_event("startup")
 async def startup_seed():
-    """Auto-seed sample data if the vector store is empty (e.g. Render cold start)."""
+    """Auto-seed sample data if the vector store is empty (e.g. Render cold start).
+    Uses batched ingestion to stay under Render's 512MB free-tier limit."""
     import gc
     from backend.embedding.vectorstore import collection_count
     from scripts.seed_data import ALL_PRODUCTS
     from backend.ingestion.pipeline import ingest_posts
 
+    MAX_SEED = 8  # Limit per product to control peak memory
+
     for product_name, posts in ALL_PRODUCTS.items():
         if collection_count(product_name) == 0:
-            print(f"[Startup] Seeding {len(posts)} posts for '{product_name}'...")
-            ingest_posts(posts, product_name)
-            gc.collect()  # Free memory between products (tight on 512MB)
+            trimmed = posts[:MAX_SEED]
+            print(f"[Startup] Seeding {len(trimmed)} posts for '{product_name}'...")
+            # Batch in groups of 4 to limit peak memory
+            for i in range(0, len(trimmed), 4):
+                ingest_posts(trimmed[i:i+4], product_name)
+                gc.collect()
             print(f"[Startup] Seeded '{product_name}'")
 
 
