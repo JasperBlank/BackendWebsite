@@ -7,7 +7,10 @@ class StreamError extends Error {}
 // In demo mode (GitHub Pages / no backend), use mock data
 export const IS_DEMO = import.meta.env.VITE_DEMO_MODE === 'true'
 
-const BASE = import.meta.env.VITE_API_BASE || '/api/v1'
+const BASE = import.meta.env.VITE_API_BASE ||
+  (import.meta.env.VITE_GH_PAGES === 'true'
+    ? 'https://hearo-backend.onrender.com/api/v1'
+    : '/api/v1')
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
