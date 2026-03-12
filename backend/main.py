@@ -29,12 +29,14 @@ app.include_router(alerts.router, prefix="/api/v1", tags=["alerts"])
 async def startup_seed():
     """Auto-seed sample data if the vector store is empty (e.g. Render cold start)."""
     from backend.embedding.vectorstore import collection_count
-    if collection_count("notion") == 0:
-        print("[Startup] No data found — seeding sample posts...")
-        from scripts.seed_data import NOTION_POSTS
-        from backend.ingestion.pipeline import ingest_posts
-        ingest_posts(NOTION_POSTS, "notion")
-        print(f"[Startup] Seeded {len(NOTION_POSTS)} posts for 'notion'")
+    from scripts.seed_data import ALL_PRODUCTS
+    from backend.ingestion.pipeline import ingest_posts
+
+    for product_name, posts in ALL_PRODUCTS.items():
+        if collection_count(product_name) == 0:
+            print(f"[Startup] Seeding {len(posts)} posts for '{product_name}'...")
+            ingest_posts(posts, product_name)
+            print(f"[Startup] Seeded '{product_name}'")
 
 
 @app.get("/health")
