@@ -16,7 +16,6 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 export async function submitQuery(req: QueryRequest): Promise<QueryResponse> {
   if (IS_DEMO) {
-    // Simulate network delay for realism
     await new Promise((r) => setTimeout(r, 1800))
     return { ...DEMO_RESULT, query: req.query, product: req.product }
   }
@@ -26,6 +25,74 @@ export async function submitQuery(req: QueryRequest): Promise<QueryResponse> {
     body: JSON.stringify({ days: 90, ...req }),
   })
   return handleResponse<QueryResponse>(res)
+}
+
+export type StreamCallback = (event: string, data: Record<string, unknown>) => void
+
+export async function submitQueryStream(req: QueryRequest, onEvent: StreamCallback): Promise<QueryResponse> {
+  if (IS_DEMO) {
+    onEvent('step', { step: 'validating', message: 'Checking indexed data...' })
+    await new Promise((r) => setTimeout(r, 400))
+    onEvent('step', { step: 'retrieving', message: 'Searching vector database...' })
+    await new Promise((r) => setTimeout(r, 600))
+    onEvent('step', { step: 'synthesizing', message: 'Claude is analyzing patterns...' })
+    await new Promise((r) => setTimeout(r, 800))
+    onEvent('step', { step: 'done', message: 'Analysis complete' })
+    return { ...DEMO_RESULT, query: req.query, product: req.product }
+  }
+
+  const res = await fetch(`${BASE}/query/stream`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ days: 90, ...req }),
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || `HTTP ${res.status}`)
+  }
+
+  const reader = res.body!.getReader()
+  const decoder = new TextDecoder()
+  let finalResult: QueryResponse | null = null
+  let buffer = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() || ''
+
+    let eventType = ''
+    for (const line of lines) {
+      if (line.startsWith('event: ')) {
+        eventType = line.slice(7)
+      } else if (line.startsWith('data: ') && eventType) {
+        try {
+          const data = JSON.parse(line.slice(6))
+          onEvent(eventType, data)
+          if (eventType === 'result') {
+            finalResult = data as QueryResponse
+          }
+          if (eventType === 'error') {
+            throw new Error(data.message || 'Analysis failed')
+          }
+        } catch (e) {
+          if (e instanceof Error && e.message !== 'Analysis failed') {
+            // JSON parse error, skip
+          } else {
+            throw e
+          }
+        }
+        eventType = ''
+      }
+    }
+  }
+
+  if (!finalResult) throw new Error('No result received from stream')
+  return finalResult
 }
 
 export async function triggerIngest(product: string, sources: string[]): Promise<void> {

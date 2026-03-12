@@ -3,15 +3,90 @@ import SentimentCard from '../components/results/SentimentCard'
 import ComplaintsTable from '../components/results/ComplaintsTable'
 import KeyFindings from '../components/results/KeyFindings'
 import SourcesBar from '../components/results/SourcesBar'
-import { ResultsSkeleton } from '../components/shared/Skeleton'
 import { useQueryStore } from '../store/queryStore'
-import { AlertCircle, FlaskConical, Save } from 'lucide-react'
+import { AlertCircle, FlaskConical, Save, Check, Loader2, Search, Database, Brain, Sparkles } from 'lucide-react'
 import { IS_DEMO } from '../api/client'
 import { saveReport } from '../lib/reports'
 import { useState } from 'react'
 
+const STEP_CONFIG: Record<string, { icon: typeof Search; label: string; index: number }> = {
+  validating:   { icon: Database,  label: 'Checking indexed data',       index: 0 },
+  validated:    { icon: Database,  label: 'Data found',                  index: 0 },
+  retrieving:   { icon: Search,    label: 'Searching vector database',   index: 1 },
+  retrieved:    { icon: Search,    label: 'Posts retrieved',             index: 1 },
+  synthesizing: { icon: Brain,     label: 'Claude is analyzing patterns', index: 2 },
+  done:         { icon: Sparkles,  label: 'Analysis complete',           index: 3 },
+}
+
+const STEPS = ['Check data', 'Retrieve posts', 'Analyze with Claude', 'Done']
+
+function AnalysisProgress({ step, message, partial }: {
+  step: string
+  message: string
+  partial: { overall_sentiment_positive_pct?: number; total_posts_analyzed?: number; sources?: { source: string; post_count: number }[] } | null
+}) {
+  const config = STEP_CONFIG[step]
+  const currentIndex = config?.index ?? -1
+
+  return (
+    <div className="bg-[#111118] border border-[#1e1e2e] rounded-xl p-6 space-y-5">
+      {/* Step indicators */}
+      <div className="flex items-center gap-2">
+        {STEPS.map((label, i) => (
+          <div key={label} className="flex items-center gap-2 flex-1">
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium shrink-0 transition-all duration-300 ${
+              i < currentIndex ? 'bg-violet-600 text-white' :
+              i === currentIndex ? 'bg-violet-500/20 text-violet-300 ring-2 ring-violet-500/40' :
+              'bg-[#1e1e2e] text-gray-600'
+            }`}>
+              {i < currentIndex ? <Check size={12} /> : i === currentIndex ? <Loader2 size={12} className="animate-spin" /> : i + 1}
+            </div>
+            <span className={`text-xs truncate ${i <= currentIndex ? 'text-gray-300' : 'text-gray-600'}`}>
+              {label}
+            </span>
+            {i < STEPS.length - 1 && (
+              <div className={`flex-1 h-px transition-colors duration-300 ${i < currentIndex ? 'bg-violet-600/40' : 'bg-[#1e1e2e]'}`} />
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Current status */}
+      <div className="flex items-center gap-2 text-sm text-violet-300">
+        <Loader2 size={14} className="animate-spin" />
+        {message}
+      </div>
+
+      {/* Partial results — shown immediately after retrieval, before Claude finishes */}
+      {partial && (
+        <div className="grid grid-cols-3 gap-4 pt-2 border-t border-[#1e1e2e]">
+          <div>
+            <p className="text-xs text-gray-500 mb-1">Sentiment</p>
+            <p className="text-lg font-bold text-white">{partial.overall_sentiment_positive_pct}%</p>
+            <p className="text-xs text-gray-600">positive</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 mb-1">Posts analyzed</p>
+            <p className="text-lg font-bold text-white">{partial.total_posts_analyzed}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 mb-1">Sources</p>
+            <div className="flex flex-wrap gap-1">
+              {partial.sources?.map((s) => (
+                <span key={s.source} className="text-xs bg-[#1e1e2e] text-gray-400 px-2 py-0.5 rounded-full">
+                  {s.source} ({s.post_count})
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Overview() {
-  const { results, isLoading, error, currentQuery, currentProduct } = useQueryStore()
+  const { results, isLoading, error, currentQuery, currentProduct, progressStep, progressMessage, partial } = useQueryStore()
   const [saved, setSaved] = useState(false)
 
   const handleSave = () => {
@@ -38,7 +113,9 @@ export default function Overview() {
 
       <QueryInput />
 
-      {isLoading && <ResultsSkeleton />}
+      {isLoading && (
+        <AnalysisProgress step={progressStep} message={progressMessage || 'Starting analysis...'} partial={partial} />
+      )}
 
       {error && (
         <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 rounded-xl p-4">
