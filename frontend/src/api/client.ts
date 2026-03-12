@@ -1,4 +1,4 @@
-import type { QueryRequest, QueryResponse, TrendsResponse } from '../types'
+import type { QueryRequest, QueryResponse, TrendsResponse, Alert, AlertCreate } from '../types'
 import { DEMO_RESULT } from './demoData'
 
 // In demo mode (GitHub Pages / no backend), use mock data
@@ -44,4 +44,33 @@ export async function getIngestStatus(product: string): Promise<{ indexed_chunks
 export async function getTrends(product: string, days = 90): Promise<TrendsResponse> {
   const res = await fetch(`${BASE}/trends?product=${product}&days=${days}`)
   return handleResponse<TrendsResponse>(res)
+}
+
+// ── Alerts ──────────────────────────────────────────────────────────
+export async function listAlerts(product?: string): Promise<Alert[]> {
+  const url = product ? `${BASE}/alerts?product=${product}` : `${BASE}/alerts`
+  const res = await fetch(url)
+  return handleResponse<Alert[]>(res)
+}
+
+export async function createAlert(body: AlertCreate): Promise<Alert> {
+  const res = await fetch(`${BASE}/alerts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  return handleResponse<Alert>(res)
+}
+
+export async function updateAlert(id: string, body: { active?: boolean; threshold?: number }): Promise<Alert> {
+  const res = await fetch(`${BASE}/alerts/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  return handleResponse<Alert>(res)
+}
+
+export async function deleteAlert(id: string): Promise<void> {
+  await fetch(`${BASE}/alerts/${id}`, { method: 'DELETE' })
 }

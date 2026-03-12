@@ -5,11 +5,22 @@ import KeyFindings from '../components/results/KeyFindings'
 import SourcesBar from '../components/results/SourcesBar'
 import { ResultsSkeleton } from '../components/shared/Skeleton'
 import { useQueryStore } from '../store/queryStore'
-import { AlertCircle, FlaskConical } from 'lucide-react'
+import { AlertCircle, FlaskConical, Save } from 'lucide-react'
 import { IS_DEMO } from '../api/client'
+import { saveReport } from '../lib/reports'
+import { useState } from 'react'
 
 export default function Overview() {
-  const { results, isLoading, error } = useQueryStore()
+  const { results, isLoading, error, currentQuery, currentProduct } = useQueryStore()
+  const [saved, setSaved] = useState(false)
+
+  const handleSave = () => {
+    if (!results || !currentQuery) return
+    const name = currentQuery.length > 40 ? currentQuery.slice(0, 40) + '…' : currentQuery
+    saveReport({ name, product: currentProduct, query: currentQuery, results })
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
 
   return (
     <div className="flex-1 flex flex-col gap-6 p-8 max-w-4xl mx-auto w-full">
@@ -47,6 +58,15 @@ export default function Overview() {
 
       {results && !isLoading && (
         <div className="space-y-4 animate-in fade-in duration-300">
+          <div className="flex justify-end">
+            <button
+              onClick={handleSave}
+              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-violet-300 transition-colors"
+            >
+              <Save size={13} />
+              {saved ? 'Saved!' : 'Save report'}
+            </button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <SentimentCard data={results} />
             {results.top_complaints.length > 0 && (

@@ -1,6 +1,8 @@
-import { NavLink } from 'react-router-dom'
-import { BarChart2, Bell, BookMarked, Swords, TrendingUp, Zap } from 'lucide-react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { BarChart2, Bell, BookMarked, Swords, TrendingUp, Trash2, Zap } from 'lucide-react'
 import { useQueryStore } from '../../store/queryStore'
+import { getReports, deleteReport } from '../../lib/reports'
+import { useState, useEffect } from 'react'
 import clsx from 'clsx'
 
 const PRODUCTS = ['notion', 'linear', 'figma', 'slack', 'github']
@@ -12,10 +14,34 @@ const NAV = [
   { to: '/alerts', label: 'Alerts', Icon: Bell },
 ]
 
-const SAVED = ['Notion audit', 'Linear vs Jira', 'Market validate']
-
 export default function Sidebar() {
-  const { currentProduct, setProduct } = useQueryStore()
+  const { currentProduct, setProduct, setQuery, loadResults } = useQueryStore()
+  const navigate = useNavigate()
+  const [reports, setReports] = useState(getReports())
+
+  // Refresh reports list when localStorage changes (e.g. after saving)
+  useEffect(() => {
+    const refresh = () => setReports(getReports())
+    window.addEventListener('storage', refresh)
+    const interval = setInterval(refresh, 2000)
+    return () => {
+      window.removeEventListener('storage', refresh)
+      clearInterval(interval)
+    }
+  }, [])
+
+  const handleLoadReport = (report: (typeof reports)[0]) => {
+    setProduct(report.product)
+    setQuery(report.query)
+    loadResults(report.results)
+    navigate('/')
+  }
+
+  const handleDelete = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation()
+    deleteReport(id)
+    setReports(getReports())
+  }
 
   return (
     <aside className="w-56 min-h-screen bg-[#0d0d15] border-r border-[#1e1e2e] flex flex-col p-4 gap-6 shrink-0">
@@ -66,15 +92,25 @@ export default function Sidebar() {
       {/* Saved reports */}
       <div className="mt-auto">
         <p className="text-xs text-gray-500 uppercase tracking-widest mb-2 px-2">Saved Reports</p>
-        {SAVED.map((name) => (
-          <button
-            key={name}
-            className="flex items-center gap-2 w-full text-left px-3 py-1.5 text-xs text-gray-500 hover:text-gray-300 rounded-lg hover:bg-white/5 transition-colors"
-          >
-            <BookMarked size={12} />
-            {name}
-          </button>
-        ))}
+        {reports.length === 0 ? (
+          <p className="text-xs text-gray-700 px-3">No saved reports yet.</p>
+        ) : (
+          reports.slice(0, 8).map((report) => (
+            <button
+              key={report.id}
+              onClick={() => handleLoadReport(report)}
+              className="group flex items-center gap-2 w-full text-left px-3 py-1.5 text-xs text-gray-500 hover:text-gray-300 rounded-lg hover:bg-white/5 transition-colors"
+            >
+              <BookMarked size={12} className="shrink-0" />
+              <span className="truncate flex-1">{report.name}</span>
+              <Trash2
+                size={11}
+                className="shrink-0 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 transition-all"
+                onClick={(e) => handleDelete(e, report.id)}
+              />
+            </button>
+          ))
+        )}
       </div>
     </aside>
   )

@@ -13,3 +13,4 @@ __pycache__/
 # Node
 frontend/node_modules/
 frontend/dist/
+alerts.json

@@ -47,3 +47,27 @@ export interface TrendsResponse {
   metric: string
   data: TrendPoint[]
 }
+
+export interface Alert {
+  id: string
+  product: string
+  topic: string
+  threshold: number
+  active: boolean
+  created_at: string
+}
+
+export interface AlertCreate {
+  product: string
+  topic: string
+  threshold: number
+}
+
+export interface SavedReport {
+  id: string
+  name: string
+  product: string
+  query: string
+  results: QueryResponse
+  saved_at: string
+}

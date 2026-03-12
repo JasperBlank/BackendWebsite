@@ -12,6 +12,7 @@ interface QueryStore {
   setProduct: (p: string) => void
   submit: () => Promise<void>
   clearResults: () => void
+  loadResults: (r: QueryResponse) => void
 }
 
 export const useQueryStore = create<QueryStore>((set, get) => ({
@@ -24,6 +25,7 @@ export const useQueryStore = create<QueryStore>((set, get) => ({
   setQuery: (q) => set({ currentQuery: q }),
   setProduct: (p) => set({ currentProduct: p, results: null }),
   clearResults: () => set({ results: null, error: null }),
+  loadResults: (r) => set({ results: r, isLoading: false, error: null }),
 
   submit: async () => {
     const { currentQuery, currentProduct } = get()
