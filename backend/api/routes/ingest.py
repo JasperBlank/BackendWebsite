@@ -62,13 +62,18 @@ async def trigger_ingest(request: IngestRequest, background: BackgroundTasks):
 
 @router.post("/ingest/seed")
 async def seed_data(background: BackgroundTasks):
-    """Seed the vector store with sample data for demo purposes."""
+    """Seed the vector store with sample data for all products."""
     def _seed():
-        from scripts.seed_data import NOTION_POSTS
-        result = ingest_posts(NOTION_POSTS, "notion")
-        print(f"[Seed] Done: {result}")
+        from scripts.seed_data import ALL_PRODUCTS
+        from backend.embedding.vectorstore import collection_count
+        for product_name, posts in ALL_PRODUCTS.items():
+            if collection_count(product_name) == 0:
+                result = ingest_posts(posts, product_name)
+                print(f"[Seed] {product_name}: {result}")
+            else:
+                print(f"[Seed] {product_name}: already has data, skipping")
     background.add_task(_seed)
-    return {"status": "seeding", "product": "notion"}
+    return {"status": "seeding", "products": list(ALL_PRODUCTS.keys()) if True else []}
 
 
 @router.get("/ingest/status/{product}")
