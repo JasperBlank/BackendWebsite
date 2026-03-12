@@ -1,5 +1,5 @@
 import math
-from backend.embedding import embedder, vectorstore
+from backend.embedding import vectorstore
 from backend.config import settings
 
 
@@ -65,14 +65,14 @@ def retrieve(
     days: int = 90,
     k: int | None = None,
 ) -> list[dict]:
-    """Full retrieval pipeline: embed -> fetch -> MMR rerank."""
+    """Full retrieval pipeline: fetch -> MMR rerank.
+    ChromaDB handles query embedding automatically."""
     synthesis_k = k or settings.synthesis_k
     fetch_k = settings.retrieval_k
 
-    query_emb = embedder.embed_query(query)
-    candidates = vectorstore.query_collection(product, query_emb, n_results=fetch_k, days=days)
+    candidates = vectorstore.query_collection(product, query, n_results=fetch_k, days=days)
 
     if not candidates:
         return []
 
-    return mmr_rerank(query_emb, candidates, k=synthesis_k)
+    return mmr_rerank([], candidates, k=synthesis_k)

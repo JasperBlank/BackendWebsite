@@ -1,10 +1,20 @@
 import chromadb
 from chromadb.config import Settings as ChromaSettings
+from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
 from backend.config import settings
 from backend.models.post import Chunk
 
 
 _client: chromadb.ClientAPI | None = None
+_embed_fn: DefaultEmbeddingFunction | None = None
+
+
+def _get_embed_fn() -> DefaultEmbeddingFunction:
+    """Shared ONNX-based embedding function (all-MiniLM-L6-v2, ~80MB RAM)."""
+    global _embed_fn
+    if _embed_fn is None:
+        _embed_fn = DefaultEmbeddingFunction()
+    return _embed_fn
 
 
 def get_client() -> chromadb.ClientAPI:
@@ -23,36 +33,31 @@ def get_collection(product: str):
     return client.get_or_create_collection(
         name=name,
         metadata={"hnsw:space": "cosine"},
+        embedding_function=_get_embed_fn(),
     )
 
 
 def upsert_chunks(chunks: list[Chunk], product: str) -> int:
-    """Upsert chunks into Chroma. Returns count upserted."""
+    """Upsert chunks into Chroma. ChromaDB embeds documents automatically."""
     if not chunks:
-        return 0
-
-    # Filter out chunks without embeddings
-    ready = [c for c in chunks if c.embedding is not None]
-    if not ready:
         return 0
 
     collection = get_collection(product)
     collection.upsert(
-        ids=[c.id for c in ready],
-        embeddings=[c.embedding for c in ready],
-        documents=[c.text for c in ready],
-        metadatas=[c.metadata for c in ready],
+        ids=[c.id for c in chunks],
+        documents=[c.text for c in chunks],
+        metadatas=[c.metadata for c in chunks],
     )
-    return len(ready)
+    return len(chunks)
 
 
 def query_collection(
     product: str,
-    query_embedding: list[float],
+    query_text: str,
     n_results: int = 40,
     days: int | None = None,
 ) -> list[dict]:
-    """Retrieve top-n chunks. Returns list of dicts with text + metadata."""
+    """Retrieve top-n chunks. ChromaDB embeds the query automatically."""
     collection = get_collection(product)
 
     # Optional time filter (Chroma metadata filtering)
@@ -64,7 +69,7 @@ def query_collection(
 
     try:
         result = collection.query(
-            query_embeddings=[query_embedding],
+            query_texts=[query_text],
             n_results=min(n_results, collection.count()),
             where=where,
             include=["documents", "metadatas", "distances"],
@@ -72,7 +77,7 @@ def query_collection(
     except Exception:
         # Fallback without date filter if collection is small / filter fails
         result = collection.query(
-            query_embeddings=[query_embedding],
+            query_texts=[query_text],
             n_results=min(n_results, max(collection.count(), 1)),
             include=["documents", "metadatas", "distances"],
         )

@@ -3,7 +3,8 @@ FROM python:3.11-slim
 WORKDIR /app
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+# Pre-cache the ONNX embedding model used by ChromaDB's DefaultEmbeddingFunction
+RUN python -c "from chromadb.utils.embedding_functions import DefaultEmbeddingFunction; DefaultEmbeddingFunction()"
 
 COPY backend/ ./backend/
 COPY scripts/ ./scripts/

@@ -28,6 +28,7 @@ app.include_router(alerts.router, prefix="/api/v1", tags=["alerts"])
 @app.on_event("startup")
 async def startup_seed():
     """Auto-seed sample data if the vector store is empty (e.g. Render cold start)."""
+    import gc
     from backend.embedding.vectorstore import collection_count
     from scripts.seed_data import ALL_PRODUCTS
     from backend.ingestion.pipeline import ingest_posts
@@ -36,6 +37,7 @@ async def startup_seed():
         if collection_count(product_name) == 0:
             print(f"[Startup] Seeding {len(posts)} posts for '{product_name}'...")
             ingest_posts(posts, product_name)
+            gc.collect()  # Free memory between products (tight on 512MB)
             print(f"[Startup] Seeded '{product_name}'")
 
 

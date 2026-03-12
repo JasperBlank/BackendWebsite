@@ -1,9 +1,9 @@
 """
-Full ingestion pipeline: fetch -> sentiment score -> chunk -> embed -> upsert
+Full ingestion pipeline: fetch -> sentiment score -> chunk -> upsert
+(ChromaDB handles embedding automatically via ONNX all-MiniLM-L6-v2)
 """
 from backend.models.post import Post, Chunk
 from backend.embedding.chunker import chunk_post
-from backend.embedding.embedder import embed_texts
 from backend.embedding.vectorstore import upsert_chunks
 
 
@@ -58,13 +58,7 @@ def ingest_posts(posts: list[Post], product: str) -> dict:
     if not all_chunks:
         return {"posts": len(posts), "chunks": 0, "upserted": 0}
 
-    # 3. Embed (batch)
-    texts = [c.text for c in all_chunks]
-    embeddings = embed_texts(texts)
-    for chunk, emb in zip(all_chunks, embeddings):
-        chunk.embedding = emb
-
-    # 4. Upsert to Chroma
+    # 3. Upsert to Chroma (embedding handled automatically by ChromaDB)
     upserted = upsert_chunks(all_chunks, product)
 
     return {"posts": len(posts), "chunks": len(all_chunks), "upserted": upserted}
