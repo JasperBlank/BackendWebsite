@@ -10,6 +10,8 @@ app.add_middleware(
         "http://localhost:5173",
         "http://localhost:3000",
         "https://yourhearo.netlify.app",
+        "https://jasperblank.com",
+        "https://www.jasperblank.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
