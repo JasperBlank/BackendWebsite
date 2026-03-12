@@ -2,15 +2,18 @@ import { useEffect, useRef } from 'react'
 import { Search, Loader2 } from 'lucide-react'
 import { useQueryStore } from '../../store/queryStore'
 
-const PLACEHOLDERS = [
-  "What are the biggest complaints about Notion's onboarding?",
-  'What features are users requesting most?',
-  'How is sentiment trending over the last 90 days?',
-  "Where does this product fall short vs competitors?",
-]
+const PRODUCT_PLACEHOLDERS: Record<string, string> = {
+  notion: "What are the biggest complaints about Notion's onboarding?",
+  linear: "How do users feel about Linear's performance and speed?",
+  figma: 'What are the top feature requests for Figma?',
+  slack: 'What frustrations do users have with Slack notifications?',
+  github: 'How is sentiment around GitHub Copilot?',
+}
+
+const DEFAULT_PLACEHOLDER = 'What are users saying about this product?'
 
 export default function QueryInput() {
-  const { currentQuery, isLoading, setQuery, submit } = useQueryStore()
+  const { currentQuery, currentProduct, isLoading, setQuery, submit } = useQueryStore()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -37,7 +40,7 @@ export default function QueryInput() {
           value={currentQuery}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={PLACEHOLDERS[0]}
+          placeholder={PRODUCT_PLACEHOLDERS[currentProduct] || DEFAULT_PLACEHOLDER}
           className="flex-1 bg-transparent text-gray-100 placeholder-gray-600 text-sm resize-none focus:outline-none min-h-[24px] max-h-48 leading-relaxed"
         />
         <button

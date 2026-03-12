@@ -1,6 +1,9 @@
 import type { QueryRequest, QueryResponse, TrendsResponse, Alert, AlertCreate } from '../types'
 import { DEMO_RESULT } from './demoData'
 
+/** Sentinel so we can distinguish backend error events from JSON parse failures */
+class StreamError extends Error {}
+
 // In demo mode (GitHub Pages / no backend), use mock data
 export const IS_DEMO = import.meta.env.VITE_DEMO_MODE === 'true'
 
@@ -77,14 +80,14 @@ export async function submitQueryStream(req: QueryRequest, onEvent: StreamCallba
             finalResult = data as QueryResponse
           }
           if (eventType === 'error') {
-            throw new Error(data.message || 'Analysis failed')
+            const msg = (data as { message?: string }).message || 'Analysis failed'
+            throw new StreamError(msg)
           }
         } catch (e) {
-          if (e instanceof Error && e.message !== 'Analysis failed') {
-            // JSON parse error, skip
-          } else {
-            throw e
+          if (e instanceof StreamError) {
+            throw new Error(e.message)
           }
+          // JSON parse error — skip malformed SSE lines
         }
         eventType = ''
       }
