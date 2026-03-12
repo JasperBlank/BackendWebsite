@@ -1,0 +1,8 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  VITE_DEMO_MODE = "false"
+  # Update this after your first Render deploy with the actual URL:
+  # VITE_API_BASE = "https://hearo-backend.onrender.com/api/v1"

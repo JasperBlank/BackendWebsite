@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: hearo-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: REDDIT_CLIENT_ID
+        sync: false
+      - key: REDDIT_CLIENT_SECRET
+        sync: false
+      - key: REDDIT_USER_AGENT
+        value: hearo/1.0
+      - key: CHROMA_PERSIST_DIR
+        value: /var/data/chroma_db
+      - key: CLAUDE_MODEL
+        value: claude-sonnet-4-6
+      - key: EMBEDDING_MODEL
+        value: local
+      - key: HF_HOME
+        value: /var/data/huggingface
+    disk:
+      name: hearo-data
+      mountPath: /var/data
+      sizeGB: 1
